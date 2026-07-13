@@ -198,7 +198,7 @@ export default function Hero({ currentLang }: HeroProps) {
                   <div className="relative group w-48 h-48 rounded-2xl overflow-hidden border border-white/10 bg-[#0A0A0B] flex items-center justify-center">
                     <img
                       id="hero-avatar"
-                      src="/src/assets/images/regenerated_image_1783742026474.png"
+                      src="/ahmad-avatar.png"
                       alt="Ahmad Syafii Avatar"
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                       referrerPolicy="no-referrer"
