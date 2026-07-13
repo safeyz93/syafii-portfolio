@@ -2,7 +2,47 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PROJECTS, Language } from '../data';
 import { Project } from '../types';
-import { ExternalLink, Eye, Github, Cpu, Coins, FileText } from 'lucide-react';
+import { ExternalLink, Eye, Github, Cpu, Coins, FileText, Facebook, Linkedin } from 'lucide-react';
+
+const SubstackIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M22.56 6.36H1.44V3.6h21.12v2.76zm0 5.16H1.44v-2.76h21.12v2.76zm-10.56 5.64L1.44 14.4v-2.76h21.12v2.76L12 17.16z" />
+  </svg>
+);
+
+function getPlatformInfo(url: string, currentLang: Language, iconClass: string = "h-5 w-5") {
+  const lowercaseUrl = url.toLowerCase();
+  if (lowercaseUrl.includes('facebook.com')) {
+    return {
+      name: 'Facebook',
+      icon: <Facebook className={iconClass} />,
+      label: currentLang === 'en' ? 'Facebook Post' : 'Postingan Facebook',
+      isRepo: false,
+    };
+  }
+  if (lowercaseUrl.includes('linkedin.com')) {
+    return {
+      name: 'LinkedIn',
+      icon: <Linkedin className={iconClass} />,
+      label: currentLang === 'en' ? 'LinkedIn Post' : 'Postingan LinkedIn',
+      isRepo: false,
+    };
+  }
+  if (lowercaseUrl.includes('substack.com')) {
+    return {
+      name: 'Substack',
+      icon: <SubstackIcon className={iconClass} />,
+      label: currentLang === 'en' ? 'Substack Article' : 'Artikel Substack',
+      isRepo: false,
+    };
+  }
+  return {
+    name: 'GitHub',
+    icon: <Github className={iconClass} />,
+    label: currentLang === 'en' ? 'GitHub Repository' : 'Repositori GitHub',
+    isRepo: true,
+  };
+}
 
 interface ProjectsGridProps {
   onSelectProject: (project: Project) => void;
@@ -142,16 +182,21 @@ export default function ProjectsGrid({ onSelectProject, currentLang }: ProjectsG
 
                   {/* Desktop overlay CTA menu */}
                   <div className="absolute inset-0 bg-[#0A0A0B]/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
-                    <a
-                      id={`project-icon-github-${proj.id}`}
-                      href={proj.githubUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-3 bg-[#0A0A0B] text-slate-300 hover:text-white rounded-xl border border-white/10 hover:border-white/20 transition-all hover:scale-110 shadow-lg"
-                      title="GitHub Repository"
-                    >
-                      <Github className="h-5 w-5" />
-                    </a>
+                    {(() => {
+                      const platform = getPlatformInfo(proj.githubUrl, currentLang);
+                      return (
+                        <a
+                          id={`project-icon-github-${proj.id}`}
+                          href={proj.githubUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-3 bg-[#0A0A0B] text-slate-300 hover:text-white rounded-xl border border-white/10 hover:border-white/20 transition-all hover:scale-110 shadow-lg"
+                          title={platform.label}
+                        >
+                          {platform.icon}
+                        </a>
+                      );
+                    })()}
                     <button
                       id={`project-icon-view-${proj.id}`}
                       onClick={() => onSelectProject(proj)}
@@ -160,16 +205,18 @@ export default function ProjectsGrid({ onSelectProject, currentLang }: ProjectsG
                       <Eye className="h-4 w-4" />
                       <span>{currentLang === 'en' ? 'Open Details' : 'Buka Detail'}</span>
                     </button>
-                    <a
-                      id={`project-icon-live-${proj.id}`}
-                      href={proj.liveUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-3 bg-[#0A0A0B] text-slate-300 hover:text-white rounded-xl border border-white/10 hover:border-white/20 transition-all hover:scale-110 shadow-lg"
-                      title="Live Website"
-                    >
-                      <ExternalLink className="h-5 w-5" />
-                    </a>
+                    {(getPlatformInfo(proj.githubUrl, currentLang).isRepo || proj.githubUrl !== proj.liveUrl) && (
+                      <a
+                        id={`project-icon-live-${proj.id}`}
+                        href={proj.liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-3 bg-[#0A0A0B] text-slate-300 hover:text-white rounded-xl border border-white/10 hover:border-white/20 transition-all hover:scale-110 shadow-lg"
+                        title={currentLang === 'en' ? 'Live Preview' : 'Demo Langsung'}
+                      >
+                        <ExternalLink className="h-5 w-5" />
+                      </a>
+                    )}
                   </div>
                 </div>
 
@@ -211,16 +258,25 @@ export default function ProjectsGrid({ onSelectProject, currentLang }: ProjectsG
                       <Eye className="h-3.5 w-3.5" />
                       <span>{currentLang === 'en' ? 'Details' : 'Detail'}</span>
                     </button>
-                    <a
-                      id={`project-mobile-live-${proj.id}`}
-                      href={proj.liveUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center justify-center space-x-1.5 bg-[#2DD4BF] hover:bg-teal-400 text-slate-950 rounded-lg py-2.5 px-3 text-xs font-bold"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      <span>Demo</span>
-                    </a>
+                    {(() => {
+                      const platform = getPlatformInfo(proj.liveUrl, currentLang, "h-3.5 w-3.5");
+                      return (
+                        <a
+                          id={`project-mobile-live-${proj.id}`}
+                          href={proj.liveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center space-x-1.5 bg-[#2DD4BF] hover:bg-teal-400 text-slate-950 rounded-lg py-2.5 px-3 text-xs font-bold"
+                        >
+                          {platform.icon}
+                          <span>
+                            {platform.isRepo
+                              ? 'Demo'
+                              : (currentLang === 'en' ? 'Read' : 'Baca')}
+                          </span>
+                        </a>
+                      );
+                    })()}
                   </div>
                 </div>
               </motion.div>
