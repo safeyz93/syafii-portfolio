@@ -4,7 +4,6 @@ import { ShieldCheck, Zap, Lightbulb, Sparkles, Download } from 'lucide-react';
 import { Language, PROFILE_BIO } from '../data';
 import { decrypt } from '../utils/crypto';
 import { ENCRYPTED_CV_DATA } from '../assets/cv_encrypted';
-import { generateCV_PDF } from '../utils/generate_pdf';
 
 interface AboutProps {
   currentLang: Language;
@@ -69,17 +68,30 @@ export default function About({ currentLang }: AboutProps) {
   const handleDownloadCV = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
-      // Decrypt CV data in memory to guarantee privacy protection
-      const decryptedJSON = decrypt(ENCRYPTED_CV_DATA);
-      if (!decryptedJSON) {
+      // Decrypt CV PDF data in memory — privacy protection
+      const decryptedBase64 = decrypt(ENCRYPTED_CV_DATA);
+      if (!decryptedBase64) {
         throw new Error("Decryption failed.");
       }
-      const data = JSON.parse(decryptedJSON);
       
-      // Generate and initiate download of the PDF on-the-fly
-      generateCV_PDF(data);
+      // Decode base64 to binary and trigger download
+      const byteChars = atob(decryptedBase64);
+      const byteNumbers = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+      }
+      const blob = new Blob([byteNumbers], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Ahmad_Syafii_CV_Resume.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Failed to decrypt and generate CV:", err);
+      console.error("Failed to decrypt and download CV:", err);
       alert(currentLang === 'en' 
         ? 'Failed to download CV. Please try again later.' 
         : 'Gagal mengunduh CV. Silakan coba lagi nanti.'
